@@ -1,5 +1,0 @@
-Feature_Selection_Method,Features
-Boruta,"LineOfCode, NoOfExternalRef, NoOfSelfRef, NoOfJS, HasDescription, NoOfImage, HasSocialNet, NoOfCSS, HasCopyrightInfo, LargestLineLength"
-RFE,"LineOfCode, LargestLineLength, NoOfExternalRef, URLCharProb, LetterRatioInURL, SpacialCharRatioInURL, NoOfCSS, URL_Profanity_Prob, URLLength, NoOfJS"
-Correlation,"HasSocialNet, HasCopyrightInfo, HasDescription, SpacialCharRatioInURL, HasHiddenFields, HasFavicon, DomainTitleMatchScore, HasSubmitButton, IsResponsive, URLTitleMatchScore"
-ContrastFS,"HasSocialNet, HasCopyrightInfo, HasDescription, SpacialCharRatioInURL, HasHiddenFields, HasFavicon, HasSubmitButton, DomainTitleMatchScore, IsResponsive, URLTitleMatchScore"
