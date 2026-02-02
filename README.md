@@ -28,7 +28,7 @@ Phishing adalah serangan siber yang menipu pengguna untuk memberikan informasi s
 ## 1.2 Tujuan Eksperimen
 
 Eksperimen ini bertujuan untuk:
-1. **Membandingkan 4 metode Feature Selection** untuk memilih fitur terbaik dari 57 fitur
+1. **Membandingkan 4 metode Feature Selection** untuk memilih fitur terbaik dari 53 fitur
 2. **Mengevaluasi 3 model klasifikasi** (Random Forest, XGBoost/GradientBoosting, SVM)
 3. **Menganalisis trade-off** antara jumlah fitur (Top 10 vs All Features) terhadap performa dan waktu training
 4. **Menggunakan 5-Fold Cross Validation** untuk evaluasi yang robust
@@ -61,7 +61,7 @@ Dalam jurnal Prasad, mereka menggunakan:
 | **Total Sampel** | 235,795 URL |
 | **Legitimate URLs** | 134,850 (57.2%) |
 | **Phishing URLs** | 100,945 (42.8%) |
-| **Total Fitur** | 63 fitur (57 fitur numerik setelah preprocessing) |
+| **Total Fitur** | 59 kolom (53 fitur numerik setelah preprocessing) |
 | **Missing Values** | Tidak ada |
 
 ## 2.2 Kategori Fitur
@@ -78,8 +78,8 @@ Fitur dalam dataset dibagi menjadi beberapa kategori:
 | `LetterRatioInURL` | Rasio huruf dalam URL |
 | `SpacialCharRatioInURL` | Rasio karakter khusus dalam URL |
 | `CharContinuationRate` | Tingkat kontinuitas karakter |
-| `URLSimilarityIndex` | Indeks kemiripan URL |
 | `TLDLegitimateProb` | Probabilitas TLD (Top Level Domain) legitimate |
+| `TLDLength` | Panjang Top Level Domain |
 
 ### B. Fitur Content-Based (Berbasis Konten HTML)
 | Fitur | Deskripsi |
@@ -95,7 +95,6 @@ Fitur dalam dataset dibagi menjadi beberapa kategori:
 ### C. Fitur Security-Related (Keamanan)
 | Fitur | Deskripsi |
 |-------|-----------|
-| `IsHTTPS` | Apakah menggunakan HTTPS (1/0) |
 | `HasFavicon` | Apakah memiliki favicon (1/0) |
 | `HasHiddenFields` | Apakah ada hidden form fields (1/0) |
 | `HasSubmitButton` | Apakah ada tombol submit (1/0) |
@@ -141,7 +140,7 @@ Fitur dalam dataset dibagi menjadi beberapa kategori:
 │                              ▼                                     ▼     │
 │                    ┌──────────────────┐              ┌──────────────────┐│
 │                    │  TOP 10 FEATURES │              │   ALL FEATURES   ││
-│                    │   (10 fitur)     │              │   (57 fitur)     ││
+│                    │   (10 fitur)     │              │   (53 fitur)     ││
 │                    └────────┬─────────┘              └────────┬─────────┘│
 │                              │                                 │         │
 │                              └─────────────┬───────────────────┘         │
@@ -237,7 +236,7 @@ from boruta import BorutaPy
 
 ```python
 # Load dataset
-df = pd.read_csv('PhiUSIIL_Phishing_URL_63_Features.csv')
+df = pd.read_csv('PhiUSIIL_Phishing_URL_59_Features.csv')
 
 print(f"Dataset shape: {df.shape}")
 print(f"\nColumns: {df.columns.tolist()}")
@@ -252,7 +251,7 @@ print(f"\nLabel distribution:\n{df['label'].value_counts()}")
 
 ### Output yang Diharapkan:
 ```
-Dataset shape: (235795, 64)
+Dataset shape: (235795, 59)
 
 Label distribution:
 1    134850  (Legitimate)
@@ -320,8 +319,8 @@ X = X.apply(pd.to_numeric, errors='coerce')
 - Kemudian diisi lagi dengan median
 
 ### Hasil Preprocessing:
-- **Input:** 64 kolom (termasuk label dan non-numerik)
-- **Output:** 57 fitur numerik + 1 target variable
+- **Input:** 59 kolom (termasuk label dan non-numerik)
+- **Output:** 53 fitur numerik + 1 target variable
 
 ---
 
@@ -506,7 +505,7 @@ def get_models(n_features):
     if n_features <= 10:
         max_depth = 10  # Untuk top 10 features
     else:
-        max_depth = 20  # Untuk all features (57)
+        max_depth = 20  # Untuk all features (53)
     
     return {
         'Random Forest': RandomForestClassifier(
@@ -547,7 +546,7 @@ RandomForestClassifier(
 | Parameter | Nilai | Penjelasan | Alasan Pemilihan |
 |-----------|-------|------------|------------------|
 | `n_estimators` | 100 | Jumlah decision trees dalam forest | **Standar industri.** 100 trees memberikan keseimbangan antara akurasi dan waktu training. Lebih banyak trees = lebih baik, tapi diminishing returns setelah 100-200 |
-| `max_depth` | 10 (top 10) / 20 (all) | Kedalaman maksimum setiap tree | **Adaptif berdasarkan fitur.** 10 fitur → depth 10 cukup untuk capture patterns. 57 fitur → depth 20 agar trees bisa model kompleksitas lebih |
+| `max_depth` | 10 (top 10) / 20 (all) | Kedalaman maksimum setiap tree | **Adaptif berdasarkan fitur.** 10 fitur → depth 10 cukup untuk capture patterns. 53 fitur → depth 20 agar trees bisa model kompleksitas lebih |
 | `random_state` | 42 | Seed untuk random number generator | **Reproducibility.** Hasil eksperimen dapat direproduksi |
 | `n_jobs` | -1 | Jumlah CPU cores | **Parallelization.** -1 = gunakan semua cores untuk training lebih cepat |
 
@@ -883,7 +882,7 @@ Hampir sama dengan Correlation (karena konsep mirip):
 | Parameter | Nilai | Justifikasi |
 |-----------|-------|-------------|
 | `n_estimators=100` | 100 trees | ✅ **Sweet spot** antara akurasi dan waktu. Studi menunjukkan >100 diminishing returns |
-| `max_depth=10/20` | Adaptif | ✅ **Sesuai kompleksitas.** 10 fitur → depth 10. 57 fitur → depth 20 agar bisa explore semua kombinasi |
+| `max_depth=10/20` | Adaptif | ✅ **Sesuai kompleksitas.** 10 fitur → depth 10. 53 fitur → depth 20 agar bisa explore semua kombinasi |
 | `random_state=42` | Fixed seed | ✅ **Reproducibility** |
 | `n_jobs=-1` | All cores | ✅ **Parallel training** |
 
@@ -1224,7 +1223,7 @@ FULL DATASET (235,795 samples)
 | F1-Score | 99.93% | 99.89% (RFE) | -0.04% |
 
 **Interpretasi:** 
-- Menggunakan 57 fitur memberikan informasi **paling lengkap**
+- Menggunakan 53 fitur memberikan informasi **paling lengkap**
 - Gap dengan Top 10 hanya ~0.05% - **sangat kecil**
 - Trade-off: All Features membutuhkan waktu training lebih lama
 
@@ -1341,7 +1340,7 @@ FULL DATASET (235,795 samples)
 
 ## 10.1 Ringkasan Eksperimen
 
-1. **Dataset:** PhiUSIIL dengan 235,795 URL dan 57 fitur numerik
+1. **Dataset:** PhiUSIIL dengan 235,795 URL dan 53 fitur numerik
 2. **Feature Selection:** 4 metode (Boruta, RFE, Correlation, ContrastFS)
 3. **Models:** 3 classifier (Random Forest, XGBoost, SVM)
 4. **Validation:** 5-Fold Stratified Cross Validation
@@ -1400,7 +1399,3 @@ FULL DATASET (235,795 samples)
 
 ---
 
-
-**Notebook:** `Feature_Selection_Model_Training(DENGAN5-FOLD-CV).ipynb`
-
----
